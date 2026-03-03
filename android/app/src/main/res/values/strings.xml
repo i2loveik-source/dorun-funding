@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">온라인 교무실</string>
+    <string name="title_activity_main">온라인 교무실</string>
+    <string name="package_name">com.totoro.smartschoolhub</string>
+    <string name="custom_url_scheme">com.totoro.smartschoolhub</string>
+</resources>

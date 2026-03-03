@@ -1,0 +1,79 @@
+{
+  "common": {
+    "login": "로그인",
+    "logout": "로그아웃",
+    "signup": "회원가입",
+    "settings": "설정",
+    "save": "저장",
+    "cancel": "취소",
+    "delete": "삭제",
+    "edit": "수정",
+    "search": "검색",
+    "loading": "로딩 중...",
+    "confirm": "확인",
+    "back": "뒤로",
+    "next": "다음",
+    "submit": "제출",
+    "approve": "승인",
+    "reject": "반려",
+    "pending": "대기 중",
+    "offline": "오프라인",
+    "online": "온라인"
+  },
+  "nav": {
+    "messenger": "메신저",
+    "dashboard": "대시보드",
+    "approvals": "결재 관리",
+    "documents": "문서 신청",
+    "calendar": "일정 관리",
+    "monthlyPlan": "월중 계획",
+    "aiTools": "AI 업무 지원",
+    "news": "소식",
+    "portfolio": "피드백",
+    "admin": "관리자 센터",
+    "personalSettings": "개인 설정"
+  },
+  "auth": {
+    "username": "아이디",
+    "password": "비밀번호",
+    "usernameOrPhone": "아이디 또는 전화번호",
+    "rememberMe": "로그인 유지",
+    "forgotPassword": "비밀번호 찾기",
+    "noAccount": "계정이 없으신가요?",
+    "hasAccount": "이미 계정이 있으신가요?",
+    "awaitingApproval": "관리자 승인 대기 중입니다."
+  },
+  "org": {
+    "school": "학교",
+    "company": "기업",
+    "cooperative": "조합",
+    "ngo": "NGO",
+    "community": "커뮤니티",
+    "switchOrg": "조직 전환",
+    "joinByCode": "초대 코드로 참여",
+    "inviteCode": "초대 코드",
+    "members": "구성원"
+  },
+  "chat": {
+    "sendMessage": "메시지를 입력하세요",
+    "noMessages": "아직 메시지가 없습니다",
+    "reply": "답글",
+    "copy": "복사",
+    "pin": "고정",
+    "announce": "공지",
+    "poll": "투표",
+    "files": "파일 모아보기",
+    "unread": "읽지 않음"
+  },
+  "approval": {
+    "fieldTrip": "현장체험학습",
+    "absence": "결석계",
+    "transfer": "전학 신청",
+    "report": "보고서",
+    "purchase": "물품 구매",
+    "leave": "휴가 신청",
+    "expense": "경비 청구",
+    "approvalLine": "결재 라인",
+    "qrVerify": "QR 코드 검증"
+  }
+}

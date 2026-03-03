@@ -1,0 +1,79 @@
+{
+  "common": {
+    "login": "Connexion",
+    "logout": "Déconnexion",
+    "signup": "Inscription",
+    "settings": "Paramètres",
+    "save": "Enregistrer",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "search": "Rechercher",
+    "loading": "Chargement...",
+    "confirm": "Confirmer",
+    "back": "Retour",
+    "next": "Suivant",
+    "submit": "Soumettre",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "pending": "En attente",
+    "offline": "Hors ligne",
+    "online": "En ligne"
+  },
+  "nav": {
+    "messenger": "Messagerie",
+    "dashboard": "Tableau de bord",
+    "approvals": "Approbations",
+    "documents": "Documents",
+    "calendar": "Calendrier",
+    "monthlyPlan": "Plan mensuel",
+    "aiTools": "Outils IA",
+    "news": "Actualités",
+    "portfolio": "Portfolio",
+    "admin": "Centre admin",
+    "personalSettings": "Paramètres"
+  },
+  "auth": {
+    "username": "Nom d'utilisateur",
+    "password": "Mot de passe",
+    "usernameOrPhone": "Nom d'utilisateur ou téléphone",
+    "rememberMe": "Rester connecté",
+    "forgotPassword": "Mot de passe oublié ?",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Vous avez déjà un compte ?",
+    "awaitingApproval": "En attente d'approbation de l'administrateur."
+  },
+  "org": {
+    "school": "École",
+    "company": "Entreprise",
+    "cooperative": "Coopérative",
+    "ngo": "ONG",
+    "community": "Communauté",
+    "switchOrg": "Changer d'organisation",
+    "joinByCode": "Rejoindre par code d'invitation",
+    "inviteCode": "Code d'invitation",
+    "members": "Membres"
+  },
+  "chat": {
+    "sendMessage": "Tapez un message",
+    "noMessages": "Aucun message",
+    "reply": "Répondre",
+    "copy": "Copier",
+    "pin": "Épingler",
+    "announce": "Annoncer",
+    "poll": "Sondage",
+    "files": "Fichiers",
+    "unread": "Non lu"
+  },
+  "approval": {
+    "fieldTrip": "Sortie scolaire",
+    "absence": "Absence",
+    "transfer": "Transfert",
+    "report": "Rapport",
+    "purchase": "Achat",
+    "leave": "Congé",
+    "expense": "Note de frais",
+    "approvalLine": "Ligne d'approbation",
+    "qrVerify": "Vérification QR"
+  }
+}

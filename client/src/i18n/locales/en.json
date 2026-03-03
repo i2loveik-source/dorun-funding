@@ -1,0 +1,79 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "signup": "Sign Up",
+    "settings": "Settings",
+    "save": "Save",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "edit": "Edit",
+    "search": "Search",
+    "loading": "Loading...",
+    "confirm": "Confirm",
+    "back": "Back",
+    "next": "Next",
+    "submit": "Submit",
+    "approve": "Approve",
+    "reject": "Reject",
+    "pending": "Pending",
+    "offline": "Offline",
+    "online": "Online"
+  },
+  "nav": {
+    "messenger": "Messenger",
+    "dashboard": "Dashboard",
+    "approvals": "Approvals",
+    "documents": "Documents",
+    "calendar": "Calendar",
+    "monthlyPlan": "Monthly Plan",
+    "aiTools": "AI Tools",
+    "news": "News",
+    "portfolio": "Portfolio",
+    "admin": "Admin Center",
+    "personalSettings": "Settings"
+  },
+  "auth": {
+    "username": "Username",
+    "password": "Password",
+    "usernameOrPhone": "Username or phone number",
+    "rememberMe": "Keep me logged in",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "awaitingApproval": "Awaiting admin approval."
+  },
+  "org": {
+    "school": "School",
+    "company": "Company",
+    "cooperative": "Cooperative",
+    "ngo": "NGO",
+    "community": "Community",
+    "switchOrg": "Switch Organization",
+    "joinByCode": "Join by invite code",
+    "inviteCode": "Invite Code",
+    "members": "Members"
+  },
+  "chat": {
+    "sendMessage": "Type a message",
+    "noMessages": "No messages yet",
+    "reply": "Reply",
+    "copy": "Copy",
+    "pin": "Pin",
+    "announce": "Announce",
+    "poll": "Poll",
+    "files": "Files",
+    "unread": "Unread"
+  },
+  "approval": {
+    "fieldTrip": "Field Trip",
+    "absence": "Absence Report",
+    "transfer": "Transfer Request",
+    "report": "Report",
+    "purchase": "Purchase Request",
+    "leave": "Leave Request",
+    "expense": "Expense Claim",
+    "approvalLine": "Approval Line",
+    "qrVerify": "QR Verification"
+  }
+}

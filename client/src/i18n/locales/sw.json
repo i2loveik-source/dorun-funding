@@ -1,0 +1,79 @@
+{
+  "common": {
+    "login": "Ingia",
+    "logout": "Ondoka",
+    "signup": "Jisajili",
+    "settings": "Mipangilio",
+    "save": "Hifadhi",
+    "cancel": "Ghairi",
+    "delete": "Futa",
+    "edit": "Hariri",
+    "search": "Tafuta",
+    "loading": "Inapakia...",
+    "confirm": "Thibitisha",
+    "back": "Rudi",
+    "next": "Ifuatayo",
+    "submit": "Wasilisha",
+    "approve": "Idhinisha",
+    "reject": "Kataa",
+    "pending": "Inasubiri",
+    "offline": "Nje ya mtandao",
+    "online": "Mtandaoni"
+  },
+  "nav": {
+    "messenger": "Ujumbe",
+    "dashboard": "Dashibodi",
+    "approvals": "Idhini",
+    "documents": "Nyaraka",
+    "calendar": "Kalenda",
+    "monthlyPlan": "Mpango wa Mwezi",
+    "aiTools": "Zana za AI",
+    "news": "Habari",
+    "portfolio": "Kazi zangu",
+    "admin": "Kituo cha Msimamizi",
+    "personalSettings": "Mipangilio"
+  },
+  "auth": {
+    "username": "Jina la mtumiaji",
+    "password": "Nywila",
+    "usernameOrPhone": "Jina la mtumiaji au nambari ya simu",
+    "rememberMe": "Nikumbuke",
+    "forgotPassword": "Umesahau nywila?",
+    "noAccount": "Huna akaunti?",
+    "hasAccount": "Una akaunti tayari?",
+    "awaitingApproval": "Inasubiri idhini ya msimamizi."
+  },
+  "org": {
+    "school": "Shule",
+    "company": "Kampuni",
+    "cooperative": "Ushirika",
+    "ngo": "NGO",
+    "community": "Jumuiya",
+    "switchOrg": "Badilisha shirika",
+    "joinByCode": "Jiunge kwa msimbo wa mwaliko",
+    "inviteCode": "Msimbo wa Mwaliko",
+    "members": "Wanachama"
+  },
+  "chat": {
+    "sendMessage": "Andika ujumbe",
+    "noMessages": "Hakuna ujumbe bado",
+    "reply": "Jibu",
+    "copy": "Nakili",
+    "pin": "Bandika",
+    "announce": "Tangazo",
+    "poll": "Kura",
+    "files": "Faili",
+    "unread": "Haijasomwa"
+  },
+  "approval": {
+    "fieldTrip": "Safari ya shuleni",
+    "absence": "Kutokuwepo",
+    "transfer": "Uhamisho",
+    "report": "Ripoti",
+    "purchase": "Ununuzi",
+    "leave": "Likizo",
+    "expense": "Gharama",
+    "approvalLine": "Mstari wa Idhini",
+    "qrVerify": "Uthibitishaji wa QR"
+  }
+}

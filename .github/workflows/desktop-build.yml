@@ -1,0 +1,44 @@
+name: Build Desktop Apps
+
+on:
+  push:
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    permissions:
+      contents: write # Required for creating releases and uploading assets
+
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22 # Updated to Node 22 for Capacitor compatibility
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build Web App
+        run: npm run build
+
+      - name: Sync Capacitor
+        run: npx cap copy electron
+
+      - name: Install Electron Dependencies
+        run: cd electron && npm install
+
+      - name: Build/Release Electron
+        run: cd electron && npm run electron:make
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

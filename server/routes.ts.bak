@@ -1,0 +1,16 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { api } from "@shared/routes";
+import { generateApprovalPDF } from "./pdf-service";
+import { neisService } from "./neis-service";
+import { z } from "zod";
+import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
+import { registerChatRoutes } from "./replit_integrations/chat";
+import { registerImageRoutes } from "./replit_integrations/image"; // We might use this or just use client
+import { openai } from "./replit_integrations/image/client"; // Use shared openai client
+import { hashPassword, comparePasswords } from "./auth-utils";
+import { updateHeartbeat, getAllOnlineStatus, getUserOnlineStatus } from "./heartbeat";
+import multer from "multer";
+import fs from "fs";
+import nodemailer from "nodemailer";

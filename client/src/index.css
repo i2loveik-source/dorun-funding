@@ -1,0 +1,98 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Education Theme - Professional Blue & Fresh Green */
+  --background: 210 20% 98%;
+  --foreground: 222 47% 11%;
+  
+  --primary: 215 95% 50%; /* Vibrant Royal Blue */
+  --primary-foreground: 210 40% 98%;
+  
+  --secondary: 152 76% 40%; /* Growth Green */
+  --secondary-foreground: 210 40% 98%;
+  
+  --muted: 210 40% 96%;
+  --muted-foreground: 215 16% 47%;
+  
+  --accent: 38 92% 50%; /* Alert/Notice Orange */
+  --accent-foreground: 222 47% 11%;
+  
+  --destructive: 0 84% 60%;
+  --destructive-foreground: 210 40% 98%;
+  
+  --border: 214 32% 91%;
+  --input: 214 32% 91%;
+  --ring: 215 95% 50%;
+  
+  --radius: 0.75rem;
+  
+  --card: 0 0% 100%;
+  --card-foreground: 222 47% 11%;
+  --card-border: 214 32% 91%;
+  
+  --popover: 0 0% 100%;
+  --popover-foreground: 222 47% 11%;
+  --popover-border: 214 32% 91%;
+  
+  --sidebar: 222 47% 11%;
+  --sidebar-foreground: 210 40% 98%;
+  --sidebar-border: 222 40% 20%;
+  --sidebar-ring: 215 95% 50%;
+  --sidebar-primary: 215 95% 50%;
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 222 40% 18%;
+  --sidebar-accent-foreground: 210 40% 98%;
+
+  --font-sans: 'Inter', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+}
+
+@layer base {
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-family: var(--font-sans);
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    @apply font-bold tracking-tight text-foreground;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+::-webkit-scrollbar-thumb {
+  @apply bg-muted-foreground/20 rounded-full hover:bg-muted-foreground/40 transition-colors;
+}
+
+/* Calendar Customization */
+.rbc-calendar {
+  @apply font-sans text-sm;
+}
+.rbc-header {
+  @apply py-2 font-semibold text-muted-foreground border-b border-border;
+}
+.rbc-event {
+  @apply bg-primary rounded-md shadow-sm border-none px-2 py-1;
+}
+.rbc-today {
+  @apply bg-primary/5;
+}
+.rbc-off-range-bg {
+  @apply bg-muted/50;
+}
+
+/* Card Hover Effects */
+.hover-card-effect {
+  @apply transition-all duration-300 hover:shadow-xl hover:-translate-y-1 hover:border-primary/20;
+}
