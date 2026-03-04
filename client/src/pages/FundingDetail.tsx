@@ -12,9 +12,10 @@ import { RealtimeFundingGauge, FundingGauge } from "@/components/FundingGauge";
 import { useCampaign, useParticipate, useMilestoneVote, useSocialProof, useWriteReview } from "@/hooks/use-funding";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 import {
   ArrowLeft, Users, Clock, Star, CheckCircle, ChevronRight,
-  MessageCircle, TrendingUp, Award, AlertCircle, Loader2
+  MessageCircle, TrendingUp, Award, AlertCircle, Loader2, Coins
 } from "lucide-react";
 
 function daysLeft(endDate: string) {
@@ -56,7 +57,17 @@ export default function FundingDetail() {
   const [reviewContent, setReviewContent] = useState("");
 
   const [amount, setAmount] = useState("");
+  const [selectedCoinType, setSelectedCoinType] = useState<"dorun_coin" | "local_coin">("dorun_coin");
   const [selectedRewardId, setSelectedRewardId] = useState<number | null>(null);
+
+  // 지갑 잔액 조회
+  const { data: walletData } = useQuery<{ wallets: Array<{ assetTypeId: number; symbol: string; name: string; coinType: "dorun_coin" | "local_coin"; balance: string; availableBalance: string; orgName?: string }> }>({
+    queryKey: ["/api/funding/campaigns", id, "wallets"],
+    queryFn: () => fetch(`/api/funding/campaigns/${id}/wallets`, { credentials: "include" }).then(r => r.json()),
+    enabled: !!id,
+  });
+  const wallets = walletData?.wallets ?? [];
+  const selectedWallet = wallets.find(w => w.coinType === selectedCoinType) ?? wallets[0];
   const [message, setMessage] = useState("");
   const [activeTab, setActiveTab] = useState<"story" | "updates" | "milestones" | "reviews">("story");
 
@@ -80,14 +91,20 @@ export default function FundingDetail() {
       toast({ title: `최소 ${campaign.minFunding} 코인 이상 입력해주세요.`, variant: "destructive" });
       return;
     }
+    const available = Number(selectedWallet?.availableBalance ?? 0);
+    if (Number(amount) > available) {
+      toast({ title: `잔액 부족: ${selectedWallet?.symbol ?? "코인"} 잔액이 ${available.toLocaleString()} 입니다.`, variant: "destructive" });
+      return;
+    }
     const result = await participate.mutateAsync({
       campaignId: id,
       amount: Number(amount),
+      coinType: selectedCoinType,
       rewardId: selectedRewardId ?? undefined,
       message: message || undefined,
       organizationId: campaign.organizationId ? Number(campaign.organizationId) : undefined,
     });
-    toast({ title: "✅ 펀딩 참여 완료!", description: `${Number(amount).toLocaleString()} 코인이 에스크로에 보관됩니다.` });
+    toast({ title: "✅ 펀딩 참여 완료!", description: `${Number(amount).toLocaleString()} ${selectedWallet?.symbol ?? "코인"}이 에스크로에 보관됩니다.` });
     setAmount("");
     setMessage("");
   }
@@ -244,10 +261,36 @@ export default function FundingDetail() {
             </div>
           )}
 
+          {/* 코인 선택 */}
+          {wallets.length > 0 && (
+            <div className="mb-3">
+              <p className="text-xs text-gray-500 mb-1.5 flex items-center gap-1"><Coins className="w-3 h-3" /> 결제 코인 선택</p>
+              <div className="flex gap-2 flex-wrap">
+                {wallets.map(w => (
+                  <button
+                    key={w.coinType}
+                    onClick={() => setSelectedCoinType(w.coinType)}
+                    className={`flex-1 min-w-[120px] px-3 py-2 rounded-xl border text-sm text-left transition-all ${
+                      selectedCoinType === w.coinType
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700"
+                        : "border-gray-200 bg-white text-gray-600 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="font-semibold">{w.symbol}</div>
+                    <div className="text-xs text-gray-400">{w.coinType === "dorun_coin" ? "두런 메인코인" : `지역코인${w.orgName ? ` · ${w.orgName}` : ""}`}</div>
+                    <div className={`text-xs font-medium mt-0.5 ${Number(w.availableBalance) <= 0 ? "text-red-400" : "text-emerald-600"}`}>
+                      잔액 {Number(w.availableBalance).toLocaleString()}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-2 mb-2">
             <Input
               type="number"
-              placeholder={`최소 ${campaign.minFunding} 코인`}
+              placeholder={`최소 ${campaign.minFunding} ${selectedWallet?.symbol ?? "코인"}`}
               value={amount}
               onChange={e => setAmount(e.target.value)}
               className="bg-white"
@@ -265,7 +308,7 @@ export default function FundingDetail() {
             disabled={participate.isPending}
             className="w-full bg-indigo-600 hover:bg-indigo-700"
           >
-            {participate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "🌱 펀딩 참여하기"}
+            {participate.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : `🌱 ${selectedWallet?.symbol ?? "코인"}으로 펀딩 참여`}
           </Button>
           <p className="text-xs text-gray-400 text-center mt-2">
             목표 미달 시 전액 자동 환불됩니다

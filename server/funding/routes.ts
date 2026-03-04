@@ -12,6 +12,7 @@ import {
 import { users, userOrganizations } from "@shared/schema";
 import { eq, and, desc, sql, inArray, ne } from "drizzle-orm";
 import { lockFunds, releaseFunds, refundAll, distributeProfit } from "./escrow";
+import { getUserWallets } from "./economy";
 
 const router = Router();
 
@@ -198,6 +199,22 @@ router.delete("/campaigns/:id", async (req, res) => {
 });
 
 // ═══ 참여 / 환불 / 집행 / 배분 ═══════════════════════════════
+
+// 사용자 지갑 잔액 조회 (캠페인의 조직 코인 포함)
+router.get("/campaigns/:id/wallets", async (req, res) => {
+  const userId = requireAuth(req, res);
+  if (!userId) return;
+  try {
+    const campaign = await db.query.campaigns?.findFirst?.({ where: eq(campaigns.id, Number(req.params.id)) })
+      ?? (await db.select().from(campaigns).where(eq(campaigns.id, Number(req.params.id))))[0];
+    if (!campaign) return res.status(404).json({ error: "캠페인을 찾을 수 없습니다." });
+    const orgId = campaign.organizationId ? Number(campaign.organizationId) : undefined;
+    const result = await getUserWallets(userId, orgId);
+    res.json(result);
+  } catch (err: any) {
+    res.status(500).json({ error: "지갑 조회 실패" });
+  }
+});
 
 router.post("/campaigns/:id/participate", async (req, res) => {
   const userId = requireAuth(req, res);

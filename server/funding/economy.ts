@@ -230,3 +230,76 @@ export async function economyDistributeProfit(params: {
     requestId: `funding-profit-${campaignId}-${toUserId}-${Date.now()}`,
   });
 }
+
+// ─── 5. 사용자 지갑 잔액 조회 ─────────────────────────────────
+export async function getUserWallets(userId: string, organizationId?: number): Promise<{
+  wallets: Array<{
+    assetTypeId: number;
+    symbol: string;
+    name: string;
+    coinType: "dorun_coin" | "local_coin";
+    balance: string;
+    availableBalance: string;
+    orgName?: string;
+  }>;
+}> {
+  try {
+    // DRB (메인 코인)
+    const drbRows = await sql`
+      SELECT w.balance, w.frozen_balance, a.id as asset_type_id, a.symbol, a.name
+      FROM economy.wallets w
+      JOIN economy.asset_types a ON w.asset_type_id = a.id
+      WHERE w.user_id = ${userId} AND a.symbol = 'DRB' AND a.organization_id IS NULL
+      LIMIT 1
+    `;
+
+    const wallets: any[] = [];
+
+    if (drbRows.length > 0) {
+      const w = drbRows[0];
+      wallets.push({
+        assetTypeId: w.asset_type_id,
+        symbol: w.symbol,
+        name: w.name,
+        coinType: "dorun_coin",
+        balance: w.balance,
+        availableBalance: String(Math.max(0, Number(w.balance) - Number(w.frozen_balance))),
+      });
+    } else {
+      // DRB 지갑 없으면 0으로
+      const drbAsset = await sql`SELECT id, symbol, name FROM economy.asset_types WHERE symbol = 'DRB' AND organization_id IS NULL LIMIT 1`;
+      if (drbAsset.length > 0) {
+        wallets.push({ assetTypeId: drbAsset[0].id, symbol: drbAsset[0].symbol, name: drbAsset[0].name, coinType: "dorun_coin", balance: "0", availableBalance: "0" });
+      }
+    }
+
+    // 지역 코인 (캠페인 조직의 코인)
+    if (organizationId) {
+      const localRows = await sql`
+        SELECT w.balance, w.frozen_balance, a.id as asset_type_id, a.symbol, a.name, s.name as org_name
+        FROM economy.wallets w
+        JOIN economy.asset_types a ON w.asset_type_id = a.id
+        LEFT JOIN public.schools s ON a.organization_id = s.id
+        WHERE w.user_id = ${userId} AND a.organization_id = ${organizationId}
+        LIMIT 1
+      `;
+      if (localRows.length > 0) {
+        const w = localRows[0];
+        wallets.push({
+          assetTypeId: w.asset_type_id,
+          symbol: w.symbol,
+          name: w.name,
+          coinType: "local_coin",
+          balance: w.balance,
+          availableBalance: String(Math.max(0, Number(w.balance) - Number(w.frozen_balance))),
+          orgName: w.org_name,
+        });
+      }
+    }
+
+    return { wallets };
+  } catch (err: any) {
+    console.error("[economy.getUserWallets]", err.message);
+    return { wallets: [] };
+  }
+}
