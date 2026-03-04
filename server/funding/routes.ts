@@ -18,8 +18,9 @@ const router = Router();
 
 function requireAuth(req: Request, res: Response): string | null {
   const user = (req as any).user;
-  if (!user?.id) { res.status(401).json({ error: "로그인이 필요합니다." }); return null; }
-  return user.id;
+  const userId = user?.id || user?.claims?.sub;
+  if (!userId) { res.status(401).json({ error: "로그인이 필요합니다." }); return null; }
+  return userId;
 }
 
 // ─── 캠페인 목록 ──────────────────────────────────────────────
@@ -97,7 +98,11 @@ router.post("/campaigns", async (req, res) => {
   const userId = requireAuth(req, res);
   if (!userId) return;
   try {
-    const parsed = insertCampaignSchema.safeParse({ ...req.body, creatorId: userId });
+    // coverImage → coverImageUrl 매핑
+    const body = { ...req.body };
+    if (body.coverImage && !body.coverImageUrl) { body.coverImageUrl = body.coverImage; delete body.coverImage; }
+
+    const parsed = insertCampaignSchema.safeParse({ ...body, creatorId: userId });
     if (!parsed.success) return res.status(400).json({ error: parsed.error.flatten() });
 
     const { rewards: rewardData, milestones: milestoneData, ...campaignData } = parsed.data as any;

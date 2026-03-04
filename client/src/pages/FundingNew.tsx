@@ -2,7 +2,7 @@
  * 캠페인 개설 폼
  * /funding/new
  */
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateCampaign } from "@/hooks/use-funding";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, Loader2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, Image, Type, X } from "lucide-react";
 import { Link } from "wouter";
 
 const CATEGORIES = [
@@ -55,18 +55,25 @@ const VISIBILITY = [
 
 interface RewardInput { title: string; description: string; minAmount: string; quantityLimit: string; }
 interface MilestoneInput { title: string; description: string; releaseRatio: string; }
+type StoryBlock = { type: "text"; content: string } | { type: "image"; url: string; caption: string };
 
 export default function FundingNew() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [, navigate] = useLocation();
   const createCampaign = useCreateCampaign();
+  const coverInputRef = useRef<HTMLInputElement>(null);
+  const blockImageRefs = useRef<{ [key: number]: HTMLInputElement | null }>({});
 
-  const [step, setStep] = useState(1); // 1: 기본정보, 2: 유형설정, 3: 상세내용
+  const [step, setStep] = useState(1);
+  const [coverImage, setCoverImage] = useState<string>("");
+  const [coverUploading, setCoverUploading] = useState(false);
+  const [storyBlocks, setStoryBlocks] = useState<StoryBlock[]>([{ type: "text", content: "" }]);
+  const [blockUploading, setBlockUploading] = useState<number | null>(null);
+
   const [form, setForm] = useState({
     title: "",
     summary: "",
-    story: "",
     category: "startup",
     fundingType: "reward",
     visibility: "org_only",
@@ -96,6 +103,56 @@ export default function FundingNew() {
     }));
   }
 
+  // 대표 이미지 업로드
+  async function uploadCoverImage(file: File) {
+    setCoverUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd, credentials: "include" });
+      const data = await res.json();
+      setCoverImage(data.url || data.fileUrl || "");
+    } catch {
+      toast({ title: "이미지 업로드 실패", variant: "destructive" });
+    } finally {
+      setCoverUploading(false);
+    }
+  }
+
+  // 블록 이미지 업로드
+  async function uploadBlockImage(index: number, file: File) {
+    setBlockUploading(index);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/upload", { method: "POST", body: fd, credentials: "include" });
+      const data = await res.json();
+      const url = data.url || data.fileUrl || "";
+      setStoryBlocks(prev => prev.map((b, i) => i === index ? { ...b, url } as StoryBlock : b));
+    } catch {
+      toast({ title: "이미지 업로드 실패", variant: "destructive" });
+    } finally {
+      setBlockUploading(null);
+    }
+  }
+
+  function addBlock(type: "text" | "image") {
+    setStoryBlocks(prev => [...prev, type === "text" ? { type: "text", content: "" } : { type: "image", url: "", caption: "" }]);
+  }
+
+  function removeBlock(index: number) {
+    setStoryBlocks(prev => prev.filter((_, i) => i !== index));
+  }
+
+  function updateBlock(index: number, updates: Partial<StoryBlock>) {
+    setStoryBlocks(prev => prev.map((b, i) => i === index ? { ...b, ...updates } as StoryBlock : b));
+  }
+
+  // 스토리 블록 → JSON 직렬화
+  function serializeStory() {
+    return JSON.stringify(storyBlocks);
+  }
+
   async function handleSubmit(asDraft = false) {
     if (!form.title || !form.targetAmount || !form.endDate) {
       toast({ title: "제목, 목표 금액, 마감일을 입력해주세요.", variant: "destructive" });
@@ -104,6 +161,8 @@ export default function FundingNew() {
 
     const payload: any = {
       ...form,
+      story: serializeStory(),
+      coverImage,
       organizationId: (user as any)?.schoolId ?? 1,
       targetAmount: form.targetAmount,
       minFunding: form.minFunding,
@@ -246,10 +305,79 @@ export default function FundingNew() {
 
       {/* ───── Step 3: 상세 내용 ───── */}
       {step === 3 && (
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
+
+          {/* 대표 이미지 */}
           <div>
-            <label className="text-sm font-medium text-gray-700 mb-1 block">스토리 (본문)</label>
-            <Textarea placeholder="캠페인을 자세히 소개해주세요. 왜 이 펀딩이 필요한지, 어떻게 사용할 것인지 설명해주세요." value={form.story} onChange={e => updateForm("story", e.target.value)} rows={8} className="resize-none" />
+            <label className="text-sm font-medium text-gray-700 mb-2 block">🖼️ 대표 이미지</label>
+            <input type="file" accept="image/*" ref={coverInputRef} className="hidden"
+              onChange={e => e.target.files?.[0] && uploadCoverImage(e.target.files[0])} />
+            {coverImage ? (
+              <div className="relative rounded-2xl overflow-hidden border border-gray-200 bg-gray-50">
+                <img src={coverImage} alt="대표 이미지" className="w-full h-48 object-cover" />
+                <button onClick={() => setCoverImage("")}
+                  className="absolute top-2 right-2 bg-white rounded-full p-1 shadow text-gray-500 hover:text-red-500">
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => coverInputRef.current?.click()}
+                className="w-full h-40 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-indigo-400 hover:text-indigo-400 transition-colors">
+                {coverUploading ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Image className="w-8 h-8" /><span className="text-sm">클릭해서 대표 이미지 업로드</span></>}
+              </button>
+            )}
+          </div>
+
+          {/* 스토리 블록 에디터 */}
+          <div>
+            <label className="text-sm font-medium text-gray-700 mb-2 block">📝 스토리 (본문)</label>
+            <div className="flex flex-col gap-3">
+              {storyBlocks.map((block, index) => (
+                <div key={index} className="relative group border border-gray-100 rounded-2xl p-3 bg-white hover:border-indigo-200 transition-colors">
+                  <button onClick={() => removeBlock(index)}
+                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                  {block.type === "text" ? (
+                    <Textarea
+                      placeholder="내용을 입력하세요..."
+                      value={block.content}
+                      onChange={e => updateBlock(index, { content: e.target.value })}
+                      rows={4}
+                      className="resize-none border-0 p-0 focus-visible:ring-0 text-sm text-gray-700"
+                    />
+                  ) : (
+                    <div className="flex flex-col gap-2">
+                      <input type="file" accept="image/*"
+                        ref={el => { blockImageRefs.current[index] = el; }}
+                        className="hidden"
+                        onChange={e => e.target.files?.[0] && uploadBlockImage(index, e.target.files[0])} />
+                      {block.url ? (
+                        <img src={block.url} alt="" className="w-full rounded-xl object-cover max-h-64" />
+                      ) : (
+                        <button onClick={() => blockImageRefs.current[index]?.click()}
+                          className="w-full h-32 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center gap-2 text-gray-400 hover:border-indigo-300 text-sm">
+                          {blockUploading === index ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Image className="w-5 h-5" /> 이미지 추가</>}
+                        </button>
+                      )}
+                      <Input placeholder="이미지 설명 (선택)" value={block.caption}
+                        onChange={e => updateBlock(index, { caption: e.target.value })}
+                        className="text-xs text-gray-500 border-0 border-b rounded-none focus-visible:ring-0 px-0" />
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button onClick={() => addBlock("text")}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors">
+                <Type className="w-3.5 h-3.5" /> 텍스트 추가
+              </button>
+              <button onClick={() => addBlock("image")}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors">
+                <Image className="w-3.5 h-3.5" /> 이미지 추가
+              </button>
+            </div>
           </div>
 
           {/* 리워드형: 리워드 추가 */}

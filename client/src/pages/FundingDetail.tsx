@@ -340,8 +340,30 @@ export default function FundingDetail() {
 
       {/* 스토리 */}
       {activeTab === "story" && (
-        <div className="prose prose-sm max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
-          {campaign.story || <p className="text-gray-400">스토리가 없습니다.</p>}
+        <div className="flex flex-col gap-4">
+          {campaign.story ? (
+            (() => {
+              try {
+                const blocks = JSON.parse(campaign.story);
+                if (Array.isArray(blocks)) {
+                  return blocks.map((block: any, i: number) =>
+                    block.type === "image" ? (
+                      <div key={i} className="flex flex-col gap-1">
+                        {block.url && <img src={block.url} alt={block.caption || ""} className="w-full rounded-2xl object-cover" />}
+                        {block.caption && <p className="text-xs text-gray-400 text-center">{block.caption}</p>}
+                      </div>
+                    ) : (
+                      <p key={i} className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{block.content}</p>
+                    )
+                  );
+                }
+              } catch {}
+              // fallback: 일반 텍스트
+              return <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{campaign.story}</p>;
+            })()
+          ) : (
+            <p className="text-gray-400">스토리가 없습니다.</p>
+          )}
         </div>
       )}
 
