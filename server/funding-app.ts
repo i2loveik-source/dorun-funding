@@ -11,6 +11,7 @@
 
 import type { Express, Request, Response } from "express";
 import { isAuthenticated } from "./replit_integrations/auth/replitAuth";
+import { registerAuthRoutes } from "./replit_integrations/auth/routes";
 import fundingRouter from "./funding/routes";
 import publicEconomyRouter from "./economy/public-api";
 import exchangeRouter from "./economy/exchange";
@@ -20,7 +21,10 @@ import { eq } from "drizzle-orm";
 import { users } from "../shared/schema";
 
 export async function registerFundingRoutes(app: Express) {
-  // 현재 사용자 정보
+  // 인증 라우트 등록 (/api/auth/user, /api/auth/login, /api/logout 등)
+  registerAuthRoutes(app);
+
+  // 현재 사용자 정보 (레거시 호환)
   app.get("/api/user", isAuthenticated, (req: Request, res: Response) => {
     res.json(req.user);
   });
