@@ -55,9 +55,9 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
 
   return (
     <Link href={`/funding/${campaign.id}`}>
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all cursor-pointer overflow-hidden group">
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:scale-[1.02] transition-all duration-200 cursor-pointer overflow-hidden group">
         {/* 커버 이미지 */}
-        <div className="relative h-40 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
+        <div className="relative aspect-video bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
           {campaign.coverImageUrl ? (
             <img
               src={campaign.coverImageUrl}
@@ -70,7 +70,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             </div>
           )}
           {/* 상단 배지들 */}
-          <div className="absolute top-2 left-2 flex gap-1">
+          <div className="absolute top-2 left-2 flex gap-1 flex-wrap">
             <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${typeInfo?.color}`}>
               {typeInfo?.label}
             </span>
@@ -79,7 +79,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             </span>
           </div>
           {/* 마감 D-day */}
-          <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">
+          <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full font-medium">
             {daysLeft(campaign.endDate)}
           </div>
         </div>
@@ -107,10 +107,10 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
           <div className="flex items-center justify-between mt-3 text-xs text-gray-400">
             <span className="flex items-center gap-1">
               <Users className="w-3 h-3" />
-              {campaign.participantCount.toLocaleString()}명 참여
+              {campaign.participantCount.toLocaleString()}명
             </span>
-            <span className="font-medium text-gray-600">
-              목표 {Number(campaign.targetAmount).toLocaleString()} 코인
+            <span className="font-semibold text-gray-600">
+              {current.toLocaleString()} / {Number(campaign.targetAmount).toLocaleString()}
             </span>
           </div>
         </div>

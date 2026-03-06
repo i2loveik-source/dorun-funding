@@ -16,7 +16,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Plus, Send, Users, MessageSquare, TrendingUp,
-  CheckCircle, Clock, AlertCircle, ChevronRight, Loader2, Star
+  CheckCircle, Clock, AlertCircle, ChevronRight, Loader2, Star, ArrowLeft
 } from "lucide-react";
 
 const STATUS_INFO: Record<string, { label: string; color: string; icon: any }> = {
@@ -283,7 +283,14 @@ export default function FundingMy() {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-6">
+      {/* 뒤로가기 */}
+      <Link href="/funding">
+        <button className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-700 mb-4">
+          <ArrowLeft className="w-4 h-4" /> 펀딩 목록으로
+        </button>
+      </Link>
+
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-xl font-bold text-gray-900">내 펀딩</h1>
           <p className="text-sm text-gray-400 mt-0.5">개설한 캠페인과 참여한 캠페인을 관리하세요</p>
@@ -293,6 +300,22 @@ export default function FundingMy() {
             <Plus className="w-3.5 h-3.5 mr-1" />새 캠페인
           </Button>
         </Link>
+      </div>
+
+      {/* 통계 요약 */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="bg-indigo-50 rounded-2xl p-3 text-center">
+          <p className="text-2xl font-black text-indigo-700">{created.length}</p>
+          <p className="text-xs text-indigo-400 mt-0.5">개설 캠페인</p>
+        </div>
+        <div className="bg-emerald-50 rounded-2xl p-3 text-center">
+          <p className="text-2xl font-black text-emerald-700">{created.filter((c: any) => c.status === "active").length}</p>
+          <p className="text-xs text-emerald-400 mt-0.5">진행 중</p>
+        </div>
+        <div className="bg-amber-50 rounded-2xl p-3 text-center">
+          <p className="text-2xl font-black text-amber-700">{created.reduce((sum: number, c: any) => sum + Number(c.currentAmount || 0), 0).toLocaleString()}</p>
+          <p className="text-xs text-amber-400 mt-0.5">누적 달성</p>
+        </div>
       </div>
 
       {/* 탭 */}

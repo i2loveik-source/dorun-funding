@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { CampaignCard } from "@/components/CampaignCard";
 import { useCampaigns } from "@/hooks/use-funding";
 import { useAuth } from "@/hooks/use-auth";
-import { Plus, Search, Filter, Loader2, TrendingUp } from "lucide-react";
+import { Plus, Search, Loader2, TrendingUp, Settings } from "lucide-react";
 
 const CATEGORIES = [
   { value: "", label: "전체" },
@@ -32,6 +32,7 @@ const TYPES = [
 ];
 
 const STATUSES = [
+  { value: "",        label: "전체" },
   { value: "active",  label: "진행 중" },
   { value: "success", label: "달성 완료" },
   { value: "pending", label: "승인 대기" },
@@ -42,7 +43,7 @@ export default function FundingList() {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedType, setSelectedType] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("active");
+  const [selectedStatus, setSelectedStatus] = useState("");
 
   const { data, isLoading } = useCampaigns({
     category: selectedCategory || undefined,
@@ -56,25 +57,55 @@ export default function FundingList() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">🌱 지역 펀딩</h1>
-          <p className="text-sm text-gray-500 mt-0.5">우리 지역 아이디어에 함께 투자해요</p>
+      {/* 히어로 배너 */}
+      <div className="bg-gradient-to-br from-emerald-600 to-teal-700 rounded-3xl p-6 mb-6 text-white relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2" />
+        <div className="flex items-start justify-between relative z-10">
+          <div>
+            <h1 className="text-2xl font-black mb-1">🌱 두런 펀딩</h1>
+            <p className="text-emerald-100 text-sm">우리 지역 아이디어에 함께 투자해요</p>
+          </div>
+          <div className="flex gap-2 mt-1">
+            <Link href="/funding/my">
+              <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-0 text-xs backdrop-blur-sm">내 펀딩</Button>
+            </Link>
+            {user && (
+              <Link href="/funding/admin">
+                <Button size="sm" className="bg-white/20 hover:bg-white/30 text-white border-0 text-xs backdrop-blur-sm">
+                  <Settings className="w-3 h-3 mr-1" />관리
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link href="/funding/my">
-            <Button variant="outline" size="sm" className="text-xs">내 펀딩</Button>
-          </Link>
-          <Link href="/funding/admin">
-            <Button variant="outline" size="sm" className="text-xs">관리</Button>
-          </Link>
-          <Link href="/funding/new">
-            <Button className="flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-700" size="sm">
-              <Plus className="w-4 h-4" />펀딩 시작
-            </Button>
-          </Link>
+        <div className="flex gap-3 mt-5 relative z-10">
+          <div className="bg-white/20 rounded-2xl px-4 py-2.5 text-center backdrop-blur-sm flex-1">
+            <p className="text-xl font-black">{data?.total ?? campaigns.length}</p>
+            <p className="text-xs text-emerald-100">전체 캠페인</p>
+          </div>
+          <div className="bg-white/20 rounded-2xl px-4 py-2.5 text-center backdrop-blur-sm flex-1">
+            <p className="text-xl font-black">{(data?.campaigns ?? []).filter((c: any) => c.status === "active").length}</p>
+            <p className="text-xs text-emerald-100">진행 중</p>
+          </div>
+          <div className="flex-1 flex items-center justify-center">
+            <Link href="/funding/new">
+              <Button className="w-full bg-white text-emerald-700 hover:bg-emerald-50 font-bold text-sm shadow-lg">
+                <Plus className="w-4 h-4 mr-1" />펀딩 시작
+              </Button>
+            </Link>
+          </div>
         </div>
+      </div>
+
+      {/* 검색 */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Input
+          placeholder="캠페인 검색..."
+          className="pl-9 bg-white shadow-sm border-gray-200 focus:border-emerald-400 focus:ring-emerald-400"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+        />
       </div>
 
       {/* 상태 탭 */}
@@ -83,26 +114,15 @@ export default function FundingList() {
           <button
             key={s.value}
             onClick={() => setSelectedStatus(s.value)}
-            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${
               selectedStatus === s.value
-                ? "bg-indigo-600 text-white"
+                ? "bg-emerald-600 text-white shadow-md shadow-emerald-200"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
             {s.label}
           </button>
         ))}
-      </div>
-
-      {/* 검색 */}
-      <div className="relative mb-4">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-        <Input
-          placeholder="캠페인 검색..."
-          className="pl-9"
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-        />
       </div>
 
       {/* 카테고리 필터 */}
@@ -130,7 +150,7 @@ export default function FundingList() {
             onClick={() => setSelectedType(t.value)}
             className={`px-3 py-1 rounded-lg text-xs font-medium transition-colors ${
               selectedType === t.value
-                ? "bg-indigo-50 text-indigo-700 border border-indigo-200"
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
                 : "bg-gray-50 text-gray-500 border border-gray-100 hover:border-gray-300"
             }`}
           >
@@ -142,7 +162,7 @@ export default function FundingList() {
       {/* 목록 */}
       {isLoading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="w-8 h-8 animate-spin text-indigo-500" />
+          <Loader2 className="w-8 h-8 animate-spin text-emerald-500" />
         </div>
       ) : campaigns.length === 0 ? (
         <div className="text-center py-20 text-gray-400">

@@ -348,12 +348,16 @@ export default function FundingDetail() {
                 if (Array.isArray(blocks)) {
                   return blocks.map((block: any, i: number) =>
                     block.type === "image" ? (
-                      <div key={i} className="flex flex-col gap-1">
-                        {block.url && <img src={block.url} alt={block.caption || ""} className="w-full rounded-2xl object-cover" />}
-                        {block.caption && <p className="text-xs text-gray-400 text-center">{block.caption}</p>}
-                      </div>
+                      <figure key={i} className="my-6">
+                        <img src={block.url} alt={block.caption} className="w-full rounded-2xl object-cover" />
+                        {block.caption && <figcaption className="text-xs text-gray-400 text-center mt-2">{block.caption}</figcaption>}
+                      </figure>
+                    ) : block.level === "h2" ? (
+                      <h2 key={i} className="text-xl font-bold text-gray-900 mt-8 mb-3">{block.content}</h2>
+                    ) : block.level === "h3" ? (
+                      <h3 key={i} className="text-lg font-semibold text-gray-800 mt-6 mb-2">{block.content}</h3>
                     ) : (
-                      <p key={i} className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{block.content}</p>
+                      <p key={i} className="text-sm text-gray-700 leading-relaxed mb-4 whitespace-pre-wrap">{block.content}</p>
                     )
                   );
                 }

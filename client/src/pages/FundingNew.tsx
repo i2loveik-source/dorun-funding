@@ -10,7 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useCreateCampaign } from "@/hooks/use-funding";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Plus, Trash2, Loader2, Image, Type, X } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, Image, Type, X, GripVertical, ChevronUp, ChevronDown } from "lucide-react";
 import { Link } from "wouter";
 
 const CATEGORIES = [
@@ -55,7 +55,7 @@ const VISIBILITY = [
 
 interface RewardInput { title: string; description: string; minAmount: string; quantityLimit: string; }
 interface MilestoneInput { title: string; description: string; releaseRatio: string; }
-type StoryBlock = { type: "text"; content: string } | { type: "image"; url: string; caption: string };
+type StoryBlock = { type: "text"; content: string; level?: "h2" | "h3" | "body" } | { type: "image"; url: string; caption: string };
 
 export default function FundingNew() {
   const { user } = useAuth();
@@ -137,7 +137,7 @@ export default function FundingNew() {
   }
 
   function addBlock(type: "text" | "image") {
-    setStoryBlocks(prev => [...prev, type === "text" ? { type: "text", content: "" } : { type: "image", url: "", caption: "" }]);
+    setStoryBlocks(prev => [...prev, type === "text" ? { type: "text", content: "", level: "body" as const } : { type: "image", url: "", caption: "" }]);
   }
 
   function removeBlock(index: number) {
@@ -146,6 +146,16 @@ export default function FundingNew() {
 
   function updateBlock(index: number, updates: Partial<StoryBlock>) {
     setStoryBlocks(prev => prev.map((b, i) => i === index ? { ...b, ...updates } as StoryBlock : b));
+  }
+
+  function moveBlock(index: number, dir: "up" | "down") {
+    setStoryBlocks(prev => {
+      const next = [...prev];
+      const swapIdx = dir === "up" ? index - 1 : index + 1;
+      if (swapIdx < 0 || swapIdx >= next.length) return prev;
+      [next[index], next[swapIdx]] = [next[swapIdx], next[index]];
+      return next;
+    });
   }
 
   // 스토리 블록 → JSON 직렬화
@@ -333,49 +343,97 @@ export default function FundingNew() {
             <label className="text-sm font-medium text-gray-700 mb-2 block">📝 스토리 (본문)</label>
             <div className="flex flex-col gap-3">
               {storyBlocks.map((block, index) => (
-                <div key={index} className="relative group border border-gray-100 rounded-2xl p-3 bg-white hover:border-indigo-200 transition-colors">
-                  <button onClick={() => removeBlock(index)}
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 text-gray-300 hover:text-red-400 transition-all">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                  {block.type === "text" ? (
-                    <Textarea
-                      placeholder="내용을 입력하세요..."
-                      value={block.content}
-                      onChange={e => updateBlock(index, { content: e.target.value })}
-                      rows={4}
-                      className="resize-none border-0 p-0 focus-visible:ring-0 text-sm text-gray-700"
-                    />
-                  ) : (
-                    <div className="flex flex-col gap-2">
-                      <input type="file" accept="image/*"
-                        ref={el => { blockImageRefs.current[index] = el; }}
-                        className="hidden"
-                        onChange={e => e.target.files?.[0] && uploadBlockImage(index, e.target.files[0])} />
-                      {block.url ? (
-                        <img src={block.url} alt="" className="w-full rounded-xl object-cover max-h-64" />
-                      ) : (
-                        <button onClick={() => blockImageRefs.current[index]?.click()}
-                          className="w-full h-32 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center gap-2 text-gray-400 hover:border-indigo-300 text-sm">
-                          {blockUploading === index ? <Loader2 className="w-5 h-5 animate-spin" /> : <><Image className="w-5 h-5" /> 이미지 추가</>}
-                        </button>
+                <div key={index} className="relative group border border-gray-200 rounded-2xl bg-white hover:border-indigo-300 transition-colors overflow-hidden">
+                  {/* 블록 헤더 */}
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-100">
+                    <GripVertical className="w-4 h-4 text-gray-300 shrink-0" />
+                    <div className="flex gap-1 flex-1">
+                      {block.type === "text" && (
+                        <>
+                          {(["h2", "h3", "body"] as const).map(level => (
+                            <button
+                              key={level}
+                              onClick={() => updateBlock(index, { level })}
+                              className={`px-2 py-0.5 rounded text-xs font-medium transition-colors ${
+                                (block as any).level === level || (!((block as any).level) && level === "body")
+                                  ? "bg-indigo-100 text-indigo-700"
+                                  : "text-gray-400 hover:bg-gray-100"
+                              }`}
+                            >
+                              {level === "h2" ? "H2" : level === "h3" ? "H3" : "본문"}
+                            </button>
+                          ))}
+                        </>
                       )}
-                      <Input placeholder="이미지 설명 (선택)" value={block.caption}
-                        onChange={e => updateBlock(index, { caption: e.target.value })}
-                        className="text-xs text-gray-500 border-0 border-b rounded-none focus-visible:ring-0 px-0" />
+                      {block.type === "image" && (
+                        <span className="text-xs text-gray-400">🖼️ 이미지 블록</span>
+                      )}
                     </div>
-                  )}
+                    <div className="flex gap-1 items-center">
+                      <button onClick={() => moveBlock(index, "up")} disabled={index === 0}
+                        className="p-0.5 text-gray-300 hover:text-gray-600 disabled:opacity-30 transition-colors">
+                        <ChevronUp className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => moveBlock(index, "down")} disabled={index === storyBlocks.length - 1}
+                        className="p-0.5 text-gray-300 hover:text-gray-600 disabled:opacity-30 transition-colors">
+                        <ChevronDown className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={() => removeBlock(index)}
+                        className="p-0.5 text-gray-300 hover:text-red-400 transition-colors ml-1">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                  {/* 블록 본문 */}
+                  <div className="p-3">
+                    {block.type === "text" ? (
+                      <Textarea
+                        placeholder="내용을 입력하세요..."
+                        value={block.content}
+                        onChange={e => updateBlock(index, { content: e.target.value })}
+                        rows={5}
+                        className={`resize-none border-0 p-0 focus-visible:ring-0 text-sm text-gray-700 ${
+                          (block as any).level === "h2" ? "text-xl font-bold" :
+                          (block as any).level === "h3" ? "text-lg font-semibold" : ""
+                        }`}
+                      />
+                    ) : (
+                      <div className="flex flex-col gap-2">
+                        <input type="file" accept="image/*"
+                          ref={el => { blockImageRefs.current[index] = el; }}
+                          className="hidden"
+                          onChange={e => e.target.files?.[0] && uploadBlockImage(index, e.target.files[0])} />
+                        {block.url ? (
+                          <div className="relative">
+                            <img src={block.url} alt="" className="w-full rounded-xl object-cover max-h-64" />
+                            <button onClick={() => updateBlock(index, { url: "" } as any)}
+                              className="absolute top-2 right-2 bg-white rounded-full p-1 shadow text-gray-500 hover:text-red-500">
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        ) : (
+                          <button onClick={() => blockImageRefs.current[index]?.click()}
+                            className="w-full h-40 rounded-xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center gap-2 text-gray-400 hover:border-indigo-300 hover:text-indigo-400 transition-colors text-sm">
+                            {blockUploading === index ? <Loader2 className="w-6 h-6 animate-spin" /> : <><Image className="w-7 h-7" /> <span>클릭해서 이미지 업로드</span></>}
+                          </button>
+                        )}
+                        <Input placeholder="이미지 설명 (선택)" value={block.caption}
+                          onChange={e => updateBlock(index, { caption: e.target.value })}
+                          className="text-xs text-gray-500 border-0 border-b rounded-none focus-visible:ring-0 px-0" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
             <div className="flex gap-2 mt-3">
               <button onClick={() => addBlock("text")}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors">
-                <Type className="w-3.5 h-3.5" /> 텍스트 추가
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-dashed border-indigo-200 text-sm text-indigo-500 hover:bg-indigo-50 transition-colors font-medium">
+                <Type className="w-4 h-4" /> 텍스트 추가
               </button>
               <button onClick={() => addBlock("image")}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 text-sm text-gray-500 hover:border-indigo-300 hover:text-indigo-500 transition-colors">
-                <Image className="w-3.5 h-3.5" /> 이미지 추가
+                className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl border-2 border-dashed border-purple-200 text-sm text-purple-500 hover:bg-purple-50 transition-colors font-medium">
+                <Image className="w-4 h-4" /> 이미지 추가
               </button>
             </div>
           </div>
