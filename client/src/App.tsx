@@ -42,12 +42,7 @@ function ProtectedRoute({ component: Component, ...rest }: { component: React.Co
     return null;
   }
 
-  // 관리자/최고관리자는 / 또는 /funding 접근 시 /funding/admin으로 자동 이동
-  const isAdmin = user.role === "admin" || user.role === "super_admin";
-  const currentPath = window.location.pathname;
-  if (isAdmin && (currentPath === "/" || currentPath === "/funding" || currentPath === "")) {
-    return <Redirect to="/funding/admin" />;
-  }
+  // 관리자도 일반 페이지 자유롭게 접근 가능 (자동 리다이렉트 제거)
 
   return <Component {...rest} />;
 }
