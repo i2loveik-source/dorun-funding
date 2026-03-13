@@ -49,12 +49,42 @@ async function resolveAssetTypeId(
     const rows = await sql`SELECT id FROM economy.asset_types WHERE symbol = 'DRB' AND organization_id IS NULL LIMIT 1`;
     return rows[0]?.id ?? 1;
   } else {
-    // 조직 자체 코인
+    // 조직 기본 코인 (V/C 제외, community 우선)
     if (!organizationId) return null;
-    const rows = await sql`
+
+    let rows = await sql`
       SELECT id FROM economy.asset_types
-      WHERE organization_id = ${organizationId} AND is_active = true
-      ORDER BY created_at ASC LIMIT 1
+      WHERE organization_id = ${organizationId}
+        AND is_active = true
+        AND type = 'community'
+        AND symbol NOT LIKE '%\_V' ESCAPE '\\'
+        AND symbol NOT LIKE '%\_C' ESCAPE '\\'
+      ORDER BY created_at ASC
+      LIMIT 1
+    `;
+    if (rows.length > 0) return rows[0].id;
+
+    rows = await sql`
+      SELECT id FROM economy.asset_types
+      WHERE organization_id = ${organizationId}
+        AND is_active = true
+        AND type IN ('community','sub')
+        AND symbol NOT LIKE '%\_V' ESCAPE '\\'
+        AND symbol NOT LIKE '%\_C' ESCAPE '\\'
+      ORDER BY created_at ASC
+      LIMIT 1
+    `;
+    if (rows.length > 0) return rows[0].id;
+
+    rows = await sql`
+      SELECT id FROM economy.asset_types
+      WHERE organization_id = ${organizationId}
+        AND is_active = true
+        AND type NOT IN ('vote','civic')
+        AND symbol NOT LIKE '%\_V' ESCAPE '\\'
+        AND symbol NOT LIKE '%\_C' ESCAPE '\\'
+      ORDER BY created_at ASC
+      LIMIT 1
     `;
     return rows[0]?.id ?? null;
   }
