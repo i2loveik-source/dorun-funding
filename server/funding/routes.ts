@@ -13,6 +13,7 @@ import { users, userOrganizations } from "@shared/schema";
 import { eq, and, desc, sql, inArray, ne } from "drizzle-orm";
 import { lockFunds, releaseFunds, refundAll, distributeProfit } from "./escrow";
 import { getUserWallets } from "./economy";
+import { pushHubActivity } from "../hubActivity";
 
 const router = Router();
 
@@ -227,8 +228,9 @@ router.post("/campaigns/:id/participate", async (req, res) => {
   const { amount, coinType, rewardId, message, isAnonymous } = req.body;
   // organizationId: 요청에서 전달되거나, 없으면 캠페인의 organizationId 사용
   const organizationId = req.body.organizationId ? Number(req.body.organizationId) : undefined;
+  const campaignId = Number(req.params.id);
   const result = await lockFunds({
-    campaignId: Number(req.params.id),
+    campaignId,
     participantId: userId,
     amount: Number(amount),
     coinType,
@@ -238,6 +240,39 @@ router.post("/campaigns/:id/participate", async (req, res) => {
     organizationId,
   });
   if (!result.success) return res.status(400).json({ error: result.error });
+
+  // 허브 타임라인 push (참여자 + 캠페인 운영자)
+  try {
+    const [camp] = await db.select().from(campaigns).where(eq(campaigns.id, campaignId)).limit(1);
+    if (camp) {
+      const fmt = (n: any) => Number(n).toLocaleString("ko-KR");
+      const sym = String(coinType || "").toUpperCase();
+      const events: any[] = [
+        {
+          userId,
+          title: `펀딩 참여: ${camp.title}`,
+          body: `${fmt(amount)} ${sym}${message ? ` · "${String(message).slice(0, 60)}"` : ""}`,
+          href: "/localFunding",
+          metadata: { campaignId, amount: Number(amount), coinType },
+          dedupeKey: `pledge:${campaignId}:${userId}:${Date.now()}`,
+        },
+      ];
+      if (camp.creatorId && camp.creatorId !== userId && !isAnonymous) {
+        events.push({
+          userId: camp.creatorId,
+          title: `${camp.title}에 새 후원`,
+          body: `+${fmt(amount)} ${sym}`,
+          href: "/localFunding",
+          metadata: { campaignId, amount: Number(amount), coinType },
+          dedupeKey: `pledge:${campaignId}:owner:${userId}:${Date.now()}`,
+        });
+      }
+      pushHubActivity(events);
+    }
+  } catch (err) {
+    console.warn("[participate] hub activity:", (err as any)?.message);
+  }
+
   res.json({ message: result.message });
 });
 
